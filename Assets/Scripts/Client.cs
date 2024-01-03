@@ -24,7 +24,7 @@ public class Client : MonoBehaviour
         chatContainer = GameObject.Find("Chat Window");
         messagePrefab = Resources.Load<GameObject>("Prefabs/Message");
 
-        clientName = "이름";
+        Managers.UI.ShowPopupUI("UI_CreateMenu");
     }
 
     /// <summary>
@@ -35,28 +35,37 @@ public class Client : MonoBehaviour
         // 이미 연결되어 있다면 함수 종료
         if (isSocketReady) return;
 
-        // 기본 호스트 / 포트 값
+        // 기본 호스트/포트 번호, 닉네임
         string host = "127.0.0.1";
         int port = 215;
+        clientName = $"Guest{UnityEngine.Random.Range(0, 10001)}";
 
-        // 입력된 값이 있다면 기본 호스트 / 포트 값을 덮어씀
+        // 입력된 값이 있다면 기본 호스트/포트 번호, 닉네임을 덮어씀
         string ov_h;
         int ov_p;
+        string ov_n;
 
         GameObject inputFileds = GameObject.Find("Canvas/Login/InputFields");
 
-        TMP_InputField input_host = inputFileds.transform.Find("Input_Host").GetComponent<TMP_InputField>();
+        TMP_InputField input_host = inputFileds.transform.Find("Group_Host/Input_Host").GetComponent<TMP_InputField>();
         ov_h = input_host.text;
         if(ov_h != "")
         {
             host = ov_h;
         }
 
-        TMP_InputField input_port = inputFileds.transform.Find("Input_Port").GetComponent<TMP_InputField>();
+        TMP_InputField input_port = inputFileds.transform.Find("Group_Port/Input_Port").GetComponent<TMP_InputField>();
         int.TryParse(input_port.text, out ov_p);
         if(ov_p != 0)
         {
             port = ov_p;
+        }
+
+        TMP_InputField input_name = inputFileds.transform.Find("Group_Name/Input_Name").GetComponent<TMP_InputField>();
+        ov_n = input_name.text;
+        if(ov_n != "")
+        {
+            clientName = ov_n;
         }
 
         // 소켓 생성
@@ -121,7 +130,7 @@ public class Client : MonoBehaviour
     /// <summary>
     /// 전송 버튼 이벤트 함수
     /// </summary>
-    private void OnSend()
+    public void OnSend()
     {
         string message = GameObject.Find("Input_Send").GetComponent<TMP_InputField>().text;
         Send(message);
