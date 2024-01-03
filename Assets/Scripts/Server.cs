@@ -65,7 +65,8 @@ public class Server : MonoBehaviour
         connectList.Add(new ServerClient(listener.EndAcceptTcpClient(result)));
         StartListening();
 
-        Debug.Log($"{connectList[connectList.Count - 1].clientName} 님이 채팅에 참가했습니다.");
+        // 연결된 클라이언트들에게 메시지를 보냄 (누군가 연결되었다고)
+        Broadcast("%NAME", new List<ServerClient>() { connectList[connectList.Count - 1] });
     }
 
     private void Update()
@@ -108,13 +109,23 @@ public class Server : MonoBehaviour
         {
             if (client != null && client.Client != null && client.Client.Connected)
             {   // 클라이언트가 null이 아니고, 연결이 되어있다면 실행
-                if (client.Client.Poll(0, SelectMode.SelectRead))
-                {
+                // 소켓의 상태를 결정
+                if (client.Client.Poll(0, SelectMode.SelectRead))   // 폴링 모드 값에 따른 Socket의 상태
+                {   // SelectRead: 호출되고 연결이 보류 중이거나, 데이터를 읽을 수 있거나, 연결이 닫혔거나, 다시 설정되거나, 종료된 경우 true 반환
+                    
+                    // 데이터를 수신할 수 있는지 확인
+                    // 지정된 SocketFlag를 사용하여 바인딩된 Socket에서 수신 버퍼로 데이터를 받는다.
+                    // Peek 플래그를 사용하면 데이터를 읽지만, 버퍼에서 제거하지 않는다.
+                    // 따라서 0을 반환하면, 데이터를 수신할 수 없다는 의미이다.
                     return !(client.Client.Receive(new byte[1], SocketFlags.Peek) == 0);
                 }
                 return true;
             }
-            else return false;
+            else return false; 
+            // 1. TcpClient 객체가 null일 경우
+            // 2. TcpClient 객체가 연결되어 있지 않을 경우
+            // 3. 소켓의 상태가 SelectRead 상태가 아닐 경우
+            // 4. 데이터를 수신할 수 없을 경우
         }
         catch
         {
@@ -122,9 +133,45 @@ public class Server : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 클라이언트가 보낸 데이터를 처리하고, 상황에 맞게 다른 클라이언트에게 전달하는 함수
+    /// </summary>
+    /// <param name="client">클라이언트</param>
+    /// <param name="data">데이터</param>
     private void OnIncomingData(ServerClient client, string data)
     {
-        Debug.Log($"{client.clientName}: {data}");
+        if(data.Contains("&NAME"))
+        {   // &NAME이 포함되어 있는지 체크
+            client.clientName = data.Split('|')[1];     // |를 기준으로 분리하여 1번째 배열을 클라이언트 이름으로 설정
+            Broadcast($"{client.clientName}님이 연결되었습니다!", connectList);  // 모든 연결된 클라이언트에게 해당 클라이언트가 연결되었다고 알림
+            return;
+        }
+
+        Broadcast($"{client.clientName}: {data}", connectList);     // 해당 클라이언트의 메시지를 모든 연결된 클라이언트에게 전송
+    }
+
+    /// <summary>
+    /// 연결된 클라이언트에게 지정된 문자열 데이터를 보내는 함수
+    /// </summary>
+    /// <param name="data">전송 데이터</param>
+    /// <param name="clients">연결된 클라이언트</param>
+    private void Broadcast(string data, List<ServerClient> clients)
+    {
+        foreach(ServerClient client in clients)
+        {
+            try
+            {
+                // 클라이언트의 TcpClient 개체에서 얻은 스트림을 사용하여 StreamWriter 개체를 인스턴스화
+                // StreamWriter는 클라이언트의 네트워크 스트림에 텍스트를 쓸 수 있게 해준다.
+                StreamWriter writer = new StreamWriter (client.tcp.GetStream());
+                writer.WriteLine(data);     // data 문자열을 클라이언트로 전송
+                writer.Flush();             // 쓰여진 데이터의 즉각적인 전송을 보장하기 위해 Flush를 StreamWriter에 호출
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"쓰기 오류: {client.clientName}로 부터 {e.Message} 메시지 전송");
+            }
+        }
     }
 }
 
