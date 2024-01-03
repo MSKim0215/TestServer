@@ -22,7 +22,7 @@ public class Client : MonoBehaviour
     private void Start()
     {
         chatContainer = GameObject.Find("Chat Window");
-        messagePrefab = Resources.Load<GameObject>("Assets/Prefabs/Message");
+        messagePrefab = Resources.Load<GameObject>("Prefabs/Message");
 
         clientName = "이름";
     }
