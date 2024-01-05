@@ -4,24 +4,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Server : MonoBehaviour
 {
-    private List<ServerClient> connectList;             // 연결된 클라이언트 목록
+    private List<ServerClient> connectList;         // 연결된 클라이언트 목록
     private List<ServerClient> disconnectList;      // 연결 해제된 클라이언트 목록
 
-    public int port = 215;      // 서버가 수신 대기할 포트 번호
+    private int port = 215;
 
     private TcpListener server;     // TCP 네트워크 클라이언트에서 연결을 수신
     private bool serverStarted;     // 서버 시작 체크
 
-    private void Start()
-    {
-        Init();
-    }
+    public bool ServerStarted { get => serverStarted; }
 
-    private void Init()
+    public void Init()
     {
         connectList = new List<ServerClient>();
         disconnectList = new List<ServerClient>();
@@ -29,6 +29,15 @@ public class Server : MonoBehaviour
         // 서버 연결 시도
         try
         {
+            GameObject inputFileds = GameObject.Find("UI_CreateMenu/Background/InputFields");
+            TMP_InputField input_port = inputFileds.transform.Find("Group_Port/Input_Port").GetComponent<TMP_InputField>();
+            int ov_p;
+            int.TryParse(input_port.text, out ov_p);
+            if (ov_p != 0)
+            {
+                port = ov_p;
+            }
+
             // IPAdress.Any: 모든 네트워크 인터페이스에서 들어오는 연결을 수락하도록 설정한다.
             server = new TcpListener(IPAddress.Any, port);
             server.Start();     // 들어오는 연결 요청의 수신을 시작

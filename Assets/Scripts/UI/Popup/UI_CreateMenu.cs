@@ -34,7 +34,13 @@ public class UI_CreateMenu : MonoBehaviour
 
     private void OnConnect()
     {
-        Debug.Log("방 생성 완료 및 접속");
+        Server server = FindObjectOfType<Server>();
+        if (server == null || server.ServerStarted) return;
+        server.Init();
+
+        Client client = FindObjectOfType<Client>();
+        if (client == null || client.IsSocketReady) return;
+        client.ConnectedToServer();
     }
 
     private void OnReturn()

@@ -19,6 +19,14 @@ public class Client : MonoBehaviour
     private StreamWriter writer;
     private StreamReader reader;
 
+    private string host;
+    private int port;
+
+    public bool IsSocketReady { get => isSocketReady; }
+
+    public string Host { get => host; private set => host = value; }
+    public int Port { get => port; private set => port = value; }
+
     private void Start()
     {
         chatContainer = GameObject.Find("Chat Window");
@@ -37,8 +45,8 @@ public class Client : MonoBehaviour
         if (isSocketReady) return;
 
         // 기본 호스트/포트 번호, 닉네임
-        string host = "127.0.0.1";
-        int port = 215;
+        Host = "127.0.0.1";
+        Port = 215;
         clientName = $"Guest{UnityEngine.Random.Range(0, 10001)}";
 
         // 입력된 값이 있다면 기본 호스트/포트 번호, 닉네임을 덮어씀
@@ -46,20 +54,20 @@ public class Client : MonoBehaviour
         int ov_p;
         string ov_n;
 
-        GameObject inputFileds = GameObject.Find("Canvas/Login/InputFields");
+        GameObject inputFileds = GameObject.Find("UI_CreateMenu/Background/InputFields");
 
         TMP_InputField input_host = inputFileds.transform.Find("Group_Host/Input_Host").GetComponent<TMP_InputField>();
         ov_h = input_host.text;
         if(ov_h != "")
         {
-            host = ov_h;
+            Host = ov_h;
         }
 
         TMP_InputField input_port = inputFileds.transform.Find("Group_Port/Input_Port").GetComponent<TMP_InputField>();
         int.TryParse(input_port.text, out ov_p);
         if(ov_p != 0)
         {
-            port = ov_p;
+            Port = ov_p;
         }
 
         TMP_InputField input_name = inputFileds.transform.Find("Group_Name/Input_Name").GetComponent<TMP_InputField>();
@@ -72,7 +80,7 @@ public class Client : MonoBehaviour
         // 소켓 생성
         try
         {
-            socket = new TcpClient(host, port);
+            socket = new TcpClient(Host, Port);
             stream = socket.GetStream();
             writer = new StreamWriter(stream);
             reader = new StreamReader(stream);
