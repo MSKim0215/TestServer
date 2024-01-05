@@ -8,7 +8,7 @@ using UnityEngine;
 
 public class Client : MonoBehaviour
 {
-    private GameObject chatContainer;
+    private Transform chatContainer;
     private GameObject messagePrefab;
 
     private string clientName;
@@ -29,8 +29,7 @@ public class Client : MonoBehaviour
 
     private void Start()
     {
-        chatContainer = GameObject.Find("Chat Window");
-        messagePrefab = Resources.Load<GameObject>("Prefabs/Message");
+        messagePrefab = Resources.Load<GameObject>("Prefabs/UI/NoticeMessage");
 
         // Scene UI 생성
         Managers.UI.ShowSceneUI("UI_Title");
@@ -119,8 +118,13 @@ public class Client : MonoBehaviour
             return;
         }
 
+        if(chatContainer == null)
+        {
+            chatContainer = FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window");
+        }
+
         // 일반 메시지일 경우
-        GameObject messageBox = Instantiate(messagePrefab, chatContainer.transform);
+        GameObject messageBox = Instantiate(messagePrefab, chatContainer);
         messageBox.GetComponentInChildren<TextMeshProUGUI>().text = data;
     }
 

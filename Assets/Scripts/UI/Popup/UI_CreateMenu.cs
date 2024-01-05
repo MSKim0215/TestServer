@@ -41,6 +41,12 @@ public class UI_CreateMenu : MonoBehaviour
         Client client = FindObjectOfType<Client>();
         if (client == null || client.IsSocketReady) return;
         client.ConnectedToServer();
+
+        if(server.ServerStarted && client.IsSocketReady)
+        {
+            UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
+            window.Init(server.Port, server.PersonCount);
+        }
     }
 
     private void OnReturn()
