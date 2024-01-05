@@ -4,10 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_Main : MonoBehaviour
+public class UI_Title : MonoBehaviour
 {
     private Transform mainMenu;
 
+    private TextMeshProUGUI tmp_title;
     private TextMeshProUGUI tmp_version;
 
     private Button btn_createRoom, btn_connectRoom;
@@ -16,6 +17,7 @@ public class UI_Main : MonoBehaviour
     {
         mainMenu = transform.Find("MainMenu");
 
+        tmp_title = transform.Find("TMP_Title").GetComponent<TextMeshProUGUI>();
         tmp_version = mainMenu.transform.Find("TMP_Version").GetComponent<TextMeshProUGUI>();
         btn_createRoom = mainMenu.transform.Find("Btn_CreateRoom").GetComponent<Button>();
         btn_connectRoom = mainMenu.transform.Find("Btn_ConnectRoom").GetComponent<Button>();
@@ -28,6 +30,8 @@ public class UI_Main : MonoBehaviour
 
     private void Init()
     {
+        tmp_title.text = "TCP통신 채팅 프로그램";
+
         // 프로그램 버전 세팅
         tmp_version.text = Application.version;
 
@@ -38,6 +42,7 @@ public class UI_Main : MonoBehaviour
 
     private void OnCreate()
     {
+        Managers.UI.ShowPopupUI("UI_CreateMenu");
     }
 
     private void OnConnect()

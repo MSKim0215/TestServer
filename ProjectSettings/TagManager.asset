@@ -41,6 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: UI
+  - name: SceneUI
     uniqueID: 948371691
+    locked: 0
+  - name: PopupUI
+    uniqueID: 490047279
     locked: 0

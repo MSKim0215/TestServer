@@ -24,7 +24,8 @@ public class Client : MonoBehaviour
         chatContainer = GameObject.Find("Chat Window");
         messagePrefab = Resources.Load<GameObject>("Prefabs/Message");
 
-        Managers.UI.ShowPopupUI("UI_CreateMenu");
+        // Scene UI 생성
+        Managers.UI.ShowSceneUI("UI_Title");
     }
 
     /// <summary>
