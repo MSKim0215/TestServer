@@ -39,6 +39,6 @@ public class UI_CreateMenu : MonoBehaviour
 
     private void OnReturn()
     {
-        gameObject.SetActive(false);
+        Managers.UI.ClosePopupUI();
     }
 }
