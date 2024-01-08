@@ -22,9 +22,9 @@ public class UI_ChatWindow : MonoBehaviour
         btn_exit = top_window.Find("Btn_Exit").GetComponent<Button>();
     }
 
-    public void Init(int roomName, int personCount)
+    public void Init(string roomName, int roomNumber, int personCount)
     {
-        tmp_name.text = $"방 번호: {roomName}";
+        tmp_name.text = $"{roomName} ({roomNumber})";
         tmp_count.text = $"참여 인원: {personCount}명";
 
         btn_exit.onClick.AddListener(() => OnExit());

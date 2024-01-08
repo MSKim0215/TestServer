@@ -15,6 +15,7 @@ public class Server : MonoBehaviour
     private List<ServerClient> disconnectList;      // 연결 해제된 클라이언트 목록
 
     private int port = 215;
+    private string roomName = string.Empty;
 
     private TcpListener server;     // TCP 네트워크 클라이언트에서 연결을 수신
     private bool serverStarted;     // 서버 시작 체크
@@ -22,6 +23,7 @@ public class Server : MonoBehaviour
     public int PersonCount { get => connectList.Count; }
 
     public int Port { get => port; }
+    public string RoomName { get => roomName; }
 
     public bool ServerStarted { get => serverStarted; }
 
@@ -40,6 +42,13 @@ public class Server : MonoBehaviour
             if (ov_p != 0)
             {
                 port = ov_p;
+            }
+
+            TMP_InputField input_room = inputFileds.transform.Find("Group_Room/Input_Room").GetComponent<TMP_InputField>();
+            string ov_r = input_room.text;
+            if(ov_r != string.Empty)
+            {
+                roomName = ov_r;
             }
 
             // IPAdress.Any: 모든 네트워크 인터페이스에서 들어오는 연결을 수락하도록 설정한다.

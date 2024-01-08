@@ -9,7 +9,7 @@ public class UI_CreateMenu : MonoBehaviour
     private Transform inputFileds;
     private Transform buttons;
 
-    private TMP_InputField input_host, input_port, input_name;
+    private TMP_InputField input_room, input_host, input_port, input_name;
     private Button btn_connect, btn_return;
 
     private void Start()
@@ -20,6 +20,7 @@ public class UI_CreateMenu : MonoBehaviour
     private void Init()
     {
         inputFileds = transform.Find("Background/InputFields");
+        input_room = inputFileds.Find("Group_Room").GetComponentInChildren<TMP_InputField>();
         input_host = inputFileds.Find("Group_Host").GetComponentInChildren<TMP_InputField>();
         input_port = inputFileds.Find("Group_Port").GetComponentInChildren<TMP_InputField>();
         input_name = inputFileds.Find("Group_Name").GetComponentInChildren<TMP_InputField>();
@@ -45,7 +46,7 @@ public class UI_CreateMenu : MonoBehaviour
         if(server.ServerStarted && client.IsSocketReady)
         {
             UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
-            window.Init(server.Port, server.PersonCount);
+            window.Init(server.RoomName, server.Port, server.PersonCount);
         }
     }
 
