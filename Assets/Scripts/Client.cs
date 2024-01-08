@@ -9,7 +9,7 @@ using UnityEngine;
 public class Client : MonoBehaviour
 {
     private Transform chatContainer;
-    private GameObject messagePrefab;
+    private GameObject owner_speech, other_speech, notice_message;
 
     private string clientName;
 
@@ -29,7 +29,9 @@ public class Client : MonoBehaviour
 
     private void Start()
     {
-        messagePrefab = Resources.Load<GameObject>("Prefabs/UI/NoticeMessage");
+        owner_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Owner_Speech");
+        other_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Other_Speech");
+        notice_message = Resources.Load<GameObject>("Prefabs/UI/NoticeMessage");
 
         // Scene UI 생성
         Managers.UI.ShowSceneUI("UI_Title");
@@ -123,9 +125,26 @@ public class Client : MonoBehaviour
             chatContainer = FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window");
         }
 
-        // 일반 메시지일 경우
-        GameObject messageBox = Instantiate(messagePrefab, chatContainer);
-        messageBox.GetComponentInChildren<TextMeshProUGUI>().text = data;
+        if(data.Contains(":"))
+        {   // 일반 메시지일 경우
+            GameObject speech = default;
+
+            string[] datas = data.Split(':');
+            if (datas[0] == clientName)
+            {   // 자기 자신이라면 owenr_speech 사용
+                speech = Instantiate(owner_speech, chatContainer);
+            }
+            else
+            {   // 자기 자신이 아니라면 other_speech 사용
+                speech = Instantiate(other_speech, chatContainer);
+            }
+
+            speech.transform.Find("Speech").GetComponentInChildren<TextMeshProUGUI>().text = datas[1];
+        }
+        else
+        {   // 참가 메시지일 경우
+            Instantiate(notice_message, chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
+        }
     }
 
     /// <summary>
