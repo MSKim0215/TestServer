@@ -5,6 +5,8 @@ using System.IO;
 using System.Net.Sockets;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class Client : MonoBehaviour
 {
@@ -122,7 +124,8 @@ public class Client : MonoBehaviour
 
         if(chatContainer == null)
         {
-            chatContainer = FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window");
+            ScrollRect chat_window = FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window").GetComponent<ScrollRect>();
+            chatContainer = chat_window.content;
         }
 
         if(data.Contains(":"))
@@ -130,7 +133,7 @@ public class Client : MonoBehaviour
             GameObject speech = default;
 
             string[] datas = data.Split(':');
-            if (datas[0] == clientName)
+            if (datas[0].Contains(clientName))
             {   // 자기 자신이라면 owenr_speech 사용
                 speech = Instantiate(owner_speech, chatContainer);
             }
@@ -145,27 +148,22 @@ public class Client : MonoBehaviour
         {   // 참가 메시지일 경우
             Instantiate(notice_message, chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
         }
+
+        Invoke("Fit", 0.03f);
     }
+
+    private void Fit() => LayoutRebuilder.ForceRebuildLayoutImmediate(chatContainer.GetComponent<RectTransform>());
 
     /// <summary>
     /// 연결된 소켓을 통해 서버로 데이터를 전송하는 함수
     /// </summary>
     /// <param name="data">데이터</param>
-    private void Send(string data)
+    public void Send(string data)
     {
         if (!isSocketReady) return;
 
         writer.WriteLine(data);     // 지정된 데이터를 한 줄로 전송
         writer.Flush();             // 출력 스트림에 있는 모든 데이터를 즉시 전송
-    }
-
-    /// <summary>
-    /// 전송 버튼 이벤트 함수
-    /// </summary>
-    public void OnSend()
-    {
-        string message = GameObject.Find("Input_Send").GetComponent<TMP_InputField>().text;
-        Send(message);
     }
 
     /// <summary>
