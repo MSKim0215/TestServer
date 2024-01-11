@@ -169,7 +169,7 @@ public class Client : MonoBehaviour
     /// <summary>
     /// 소켓을 종료하는 함수
     /// </summary>
-    private void CloseSocket()
+    public void CloseSocket()
     {
         if (!isSocketReady) return;
 

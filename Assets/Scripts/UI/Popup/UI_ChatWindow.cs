@@ -37,6 +37,9 @@ public class UI_ChatWindow : MonoBehaviour
 
     private void OnExit()
     {
+        Client client = FindObjectOfType<Client>();
+        client?.CloseSocket();
+
         Managers.UI.ClosePopupUI();
     }
 
