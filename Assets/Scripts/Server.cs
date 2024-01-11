@@ -4,24 +4,30 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Server : MonoBehaviour
 {
-    private List<ServerClient> connectList;             // 연결된 클라이언트 목록
+    private List<ServerClient> connectList;         // 연결된 클라이언트 목록
     private List<ServerClient> disconnectList;      // 연결 해제된 클라이언트 목록
 
-    public int port = 215;      // 서버가 수신 대기할 포트 번호
+    private int port = 215;
+    private string roomName = string.Empty;
 
     private TcpListener server;     // TCP 네트워크 클라이언트에서 연결을 수신
     private bool serverStarted;     // 서버 시작 체크
 
-    private void Start()
-    {
-        Init();
-    }
+    public int PersonCount { get => connectList.Count; }
 
-    private void Init()
+    public int Port { get => port; }
+    public string RoomName { get => roomName; }
+
+    public bool ServerStarted { get => serverStarted; }
+
+    public void Init()
     {
         connectList = new List<ServerClient>();
         disconnectList = new List<ServerClient>();
@@ -29,14 +35,30 @@ public class Server : MonoBehaviour
         // 서버 연결 시도
         try
         {
+            GameObject inputFileds = GameObject.Find("UI_CreateMenu/Background/InputFields");
+            TMP_InputField input_port = inputFileds.transform.Find("Group_Port/Input_Port").GetComponent<TMP_InputField>();
+            int ov_p;
+            int.TryParse(input_port.text, out ov_p);
+            if (ov_p != 0)
+            {
+                port = ov_p;
+            }
+
+            TMP_InputField input_room = inputFileds.transform.Find("Group_Room/Input_Room").GetComponent<TMP_InputField>();
+            string ov_r = input_room.text;
+            if(ov_r != string.Empty)
+            {
+                roomName = ov_r;
+            }
+
             // IPAdress.Any: 모든 네트워크 인터페이스에서 들어오는 연결을 수락하도록 설정한다.
-            server = new TcpListener(IPAddress.Any, port);
+            server = new TcpListener(IPAddress.Any, Port);
             server.Start();     // 들어오는 연결 요청의 수신을 시작
 
             StartListening();
             serverStarted = true;
 
-            Debug.Log($"포트 번호 {port}로 서버가 시작되었습니다!");
+            Debug.Log($"포트 번호 {Port}로 서버가 시작되었습니다!");
         }
         catch (Exception e)
         {
@@ -143,7 +165,7 @@ public class Server : MonoBehaviour
         if(data.Contains("&NAME"))
         {   // &NAME이 포함되어 있는지 체크
             client.clientName = data.Split('|')[1];     // |를 기준으로 분리하여 1번째 배열을 클라이언트 이름으로 설정
-            Broadcast($"{client.clientName}님이 연결되었습니다!", connectList);  // 모든 연결된 클라이언트에게 해당 클라이언트가 연결되었다고 알림
+            Broadcast($"{client.clientName}님이 참가했습니다.", connectList);  // 모든 연결된 클라이언트에게 해당 클라이언트가 연결되었다고 알림
             return;
         }
 
