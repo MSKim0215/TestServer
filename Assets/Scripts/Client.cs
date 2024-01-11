@@ -5,11 +5,13 @@ using System.IO;
 using System.Net.Sockets;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class Client : MonoBehaviour
 {
-    private GameObject chatContainer;
-    private GameObject messagePrefab;
+    private Transform chatContainer;
+    private GameObject owner_speech, other_speech, notice_message;
 
     private string clientName;
 
@@ -19,12 +21,22 @@ public class Client : MonoBehaviour
     private StreamWriter writer;
     private StreamReader reader;
 
+    private string host;
+    private int port;
+
+    public bool IsSocketReady { get => isSocketReady; }
+
+    public string Host { get => host; private set => host = value; }
+    public int Port { get => port; private set => port = value; }
+
     private void Start()
     {
-        chatContainer = GameObject.Find("Chat Window");
-        messagePrefab = Resources.Load<GameObject>("Prefabs/Message");
+        owner_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Owner_Speech");
+        other_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Other_Speech");
+        notice_message = Resources.Load<GameObject>("Prefabs/UI/NoticeMessage");
 
-        clientName = "이름";
+        // Scene UI 생성
+        Managers.UI.ShowSceneUI("UI_Title");
     }
 
     /// <summary>
@@ -35,34 +47,43 @@ public class Client : MonoBehaviour
         // 이미 연결되어 있다면 함수 종료
         if (isSocketReady) return;
 
-        // 기본 호스트 / 포트 값
-        string host = "127.0.0.1";
-        int port = 215;
+        // 기본 호스트/포트 번호, 닉네임
+        Host = "127.0.0.1";
+        Port = 215;
+        clientName = $"Guest{UnityEngine.Random.Range(0, 10001)}";
 
-        // 입력된 값이 있다면 기본 호스트 / 포트 값을 덮어씀
+        // 입력된 값이 있다면 기본 호스트/포트 번호, 닉네임을 덮어씀
         string ov_h;
         int ov_p;
+        string ov_n;
 
-        GameObject inputFileds = GameObject.Find("Canvas/Login/InputFields");
+        GameObject inputFileds = GameObject.Find("UI_CreateMenu/Background/InputFields");
 
-        TMP_InputField input_host = inputFileds.transform.Find("Input_Host").GetComponent<TMP_InputField>();
+        TMP_InputField input_host = inputFileds.transform.Find("Group_Host/Input_Host").GetComponent<TMP_InputField>();
         ov_h = input_host.text;
         if(ov_h != "")
         {
-            host = ov_h;
+            Host = ov_h;
         }
 
-        TMP_InputField input_port = inputFileds.transform.Find("Input_Port").GetComponent<TMP_InputField>();
+        TMP_InputField input_port = inputFileds.transform.Find("Group_Port/Input_Port").GetComponent<TMP_InputField>();
         int.TryParse(input_port.text, out ov_p);
         if(ov_p != 0)
         {
-            port = ov_p;
+            Port = ov_p;
+        }
+
+        TMP_InputField input_name = inputFileds.transform.Find("Group_Name/Input_Name").GetComponent<TMP_InputField>();
+        ov_n = input_name.text;
+        if(ov_n != "")
+        {
+            clientName = ov_n;
         }
 
         // 소켓 생성
         try
         {
-            socket = new TcpClient(host, port);
+            socket = new TcpClient(Host, Port);
             stream = socket.GetStream();
             writer = new StreamWriter(stream);
             reader = new StreamReader(stream);
@@ -101,16 +122,43 @@ public class Client : MonoBehaviour
             return;
         }
 
-        // 일반 메시지일 경우
-        GameObject messageBox = Instantiate(messagePrefab, chatContainer.transform);
-        messageBox.GetComponentInChildren<TextMeshProUGUI>().text = data;
+        if(chatContainer == null)
+        {
+            ScrollRect chat_window = FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window").GetComponent<ScrollRect>();
+            chatContainer = chat_window.content;
+        }
+
+        if(data.Contains(":"))
+        {   // 일반 메시지일 경우
+            GameObject speech = default;
+
+            string[] datas = data.Split(':');
+            if (datas[0].Contains(clientName))
+            {   // 자기 자신이라면 owenr_speech 사용
+                speech = Instantiate(owner_speech, chatContainer);
+            }
+            else
+            {   // 자기 자신이 아니라면 other_speech 사용
+                speech = Instantiate(other_speech, chatContainer);
+            }
+
+            speech.transform.Find("Speech").GetComponentInChildren<TextMeshProUGUI>().text = datas[1];
+        }
+        else
+        {   // 참가 메시지일 경우
+            Instantiate(notice_message, chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
+        }
+
+        Invoke("Fit", 0.03f);
     }
+
+    private void Fit() => LayoutRebuilder.ForceRebuildLayoutImmediate(chatContainer.GetComponent<RectTransform>());
 
     /// <summary>
     /// 연결된 소켓을 통해 서버로 데이터를 전송하는 함수
     /// </summary>
     /// <param name="data">데이터</param>
-    private void Send(string data)
+    public void Send(string data)
     {
         if (!isSocketReady) return;
 
@@ -119,18 +167,9 @@ public class Client : MonoBehaviour
     }
 
     /// <summary>
-    /// 전송 버튼 이벤트 함수
-    /// </summary>
-    private void OnSend()
-    {
-        string message = GameObject.Find("Input_Send").GetComponent<TMP_InputField>().text;
-        Send(message);
-    }
-
-    /// <summary>
     /// 소켓을 종료하는 함수
     /// </summary>
-    private void CloseSocket()
+    public void CloseSocket()
     {
         if (!isSocketReady) return;
 
