@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
-public class Client : MonoBehaviour
+public class Client
 {
     private Transform chatContainer;
     private GameObject owner_speech, other_speech, notice_message;
@@ -21,15 +21,12 @@ public class Client : MonoBehaviour
     private StreamWriter writer;
     private StreamReader reader;
 
-    private string host;
-    private int port;
-
     public bool IsSocketReady { get => isSocketReady; }
 
-    public string Host { get => host; private set => host = value; }
-    public int Port { get => port; private set => port = value; }
+    public string Host { get => Managers.System.Host; set => Managers.System.Host = value; }
+    public int Port { get => Managers.System.Port; set => Managers.System.Port = value; }
 
-    private void Start()
+    public void Init()
     {
         owner_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Owner_Speech");
         other_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Other_Speech");
@@ -95,12 +92,12 @@ public class Client : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void OnUpdate()
     {
-        if(isSocketReady)
+        if(IsSocketReady)
         {
             if(stream.DataAvailable)
-            {   // 소켓의 입력 스트림에 읽을 수 있는 데이터가 있을 경우
+            {   // 소켓의 입력 스트림에 읽을 수 있는 데이터가 있다면 실행
                 string data = reader.ReadLine();
                 if(data != null)
                 {
@@ -124,7 +121,7 @@ public class Client : MonoBehaviour
 
         if(chatContainer == null)
         {
-            ScrollRect chat_window = FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window").GetComponent<ScrollRect>();
+            ScrollRect chat_window = UnityEngine.Object.FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window").GetComponent<ScrollRect>();
             chatContainer = chat_window.content;
         }
 
@@ -135,21 +132,22 @@ public class Client : MonoBehaviour
             string[] datas = data.Split(':');
             if (datas[0].Contains(clientName))
             {   // 자기 자신이라면 owenr_speech 사용
-                speech = Instantiate(owner_speech, chatContainer);
+                speech = UnityEngine.Object.Instantiate(owner_speech, chatContainer);
             }
             else
             {   // 자기 자신이 아니라면 other_speech 사용
-                speech = Instantiate(other_speech, chatContainer);
+                speech = UnityEngine.Object.Instantiate(other_speech, chatContainer);
             }
 
             speech.transform.Find("Speech").GetComponentInChildren<TextMeshProUGUI>().text = datas[1];
         }
         else
         {   // 참가 메시지일 경우
-            Instantiate(notice_message, chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
+            UnityEngine.Object.Instantiate(notice_message, chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
         }
 
-        Invoke("Fit", 0.03f);
+        Fit();
+        //Invoke("Fit", 0.03f);
     }
 
     private void Fit() => LayoutRebuilder.ForceRebuildLayoutImmediate(chatContainer.GetComponent<RectTransform>());

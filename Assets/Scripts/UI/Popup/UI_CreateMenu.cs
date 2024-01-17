@@ -35,11 +35,11 @@ public class UI_CreateMenu : MonoBehaviour
 
     private void OnConnect()
     {
-        Server server = FindObjectOfType<Server>();
+        Server server = Managers.System.Server;
         if (server == null || server.ServerStarted) return;
         server.Init();
 
-        Client client = FindObjectOfType<Client>();
+        Client client = Managers.System.Client;
         if (client == null || client.IsSocketReady) return;
         client.ConnectedToServer();
 

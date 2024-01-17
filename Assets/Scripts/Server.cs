@@ -9,12 +9,11 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Server : MonoBehaviour
+public class Server
 {
     private List<ServerClient> connectList;         // 연결된 클라이언트 목록
     private List<ServerClient> disconnectList;      // 연결 해제된 클라이언트 목록
 
-    private int port = 215;
     private string roomName = string.Empty;
 
     private TcpListener server;     // TCP 네트워크 클라이언트에서 연결을 수신
@@ -22,7 +21,7 @@ public class Server : MonoBehaviour
 
     public int PersonCount { get => connectList.Count; }
 
-    public int Port { get => port; }
+    public int Port { get => Managers.System.Port; set => Managers.System.Port = value; }
     public string RoomName { get => roomName; }
 
     public bool ServerStarted { get => serverStarted; }
@@ -41,7 +40,7 @@ public class Server : MonoBehaviour
             int.TryParse(input_port.text, out ov_p);
             if (ov_p != 0)
             {
-                port = ov_p;
+                Port = ov_p;
             }
 
             TMP_InputField input_room = inputFileds.transform.Find("Group_Room/Input_Room").GetComponent<TMP_InputField>();
@@ -91,7 +90,7 @@ public class Server : MonoBehaviour
         Broadcast("%NAME", new List<ServerClient>() { connectList[connectList.Count - 1] });
     }
 
-    private void Update()
+    public void OnUpdate()
     {
         if (!serverStarted) return;
 
