@@ -11,7 +11,6 @@ using UnityEngine.UIElements;
 public class Client
 {
     private Transform chatContainer;
-    private GameObject owner_speech, other_speech, notice_message;
 
     private string clientName;
 
@@ -28,10 +27,6 @@ public class Client
 
     public void Init()
     {
-        owner_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Owner_Speech");
-        other_speech = Resources.Load<GameObject>("Prefabs/UI/Speech/Other_Speech");
-        notice_message = Resources.Load<GameObject>("Prefabs/UI/NoticeMessage");
-
         // Scene UI 생성
         Managers.UI.ShowSceneUI("UI_Title");
     }
@@ -132,18 +127,18 @@ public class Client
             string[] datas = data.Split(':');
             if (datas[0].Contains(clientName))
             {   // 자기 자신이라면 owenr_speech 사용
-                speech = UnityEngine.Object.Instantiate(owner_speech, chatContainer);
+                speech = UnityEngine.Object.Instantiate(Managers.Resource.SpeechLoad(Define.SpeechType.Owner_Speech), chatContainer);
             }
             else
             {   // 자기 자신이 아니라면 other_speech 사용
-                speech = UnityEngine.Object.Instantiate(other_speech, chatContainer);
+                speech = UnityEngine.Object.Instantiate(Managers.Resource.SpeechLoad(Define.SpeechType.Other_Speech), chatContainer);
             }
 
             speech.transform.Find("Speech").GetComponentInChildren<TextMeshProUGUI>().text = datas[1];
         }
         else
         {   // 참가 메시지일 경우
-            UnityEngine.Object.Instantiate(notice_message, chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
+            UnityEngine.Object.Instantiate(Managers.Resource.SpeechLoad(Define.SpeechType.NoticeMessage), chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
         }
 
         Fit();

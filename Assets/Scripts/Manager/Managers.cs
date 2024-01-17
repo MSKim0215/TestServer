@@ -8,9 +8,11 @@ public class Managers : MonoBehaviour
 
     private UIManager ui = new UIManager();
     private SystemManager system = new SystemManager();
+    private ResourceManager resource = new ResourceManager();
 
     public static UIManager UI => Instance.ui;
     public static SystemManager System => Instance.system;
+    public static ResourceManager Resource => Instance.resource;
 
     private static Managers Instance { get { Init(); return instance; } }
 
@@ -34,6 +36,7 @@ public class Managers : MonoBehaviour
             instance = obj.GetComponent<Managers>();
 
             instance.system.Init();
+            instance.resource.Init();
         }
     }
 
