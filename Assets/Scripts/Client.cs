@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class Client
 {
@@ -19,6 +16,10 @@ public class Client
     private NetworkStream stream;
     private StreamWriter writer;
     private StreamReader reader;
+
+    public bool isHost = false;
+
+    public TcpClient Socket { get => socket; }
 
     public bool IsSocketReady { get => isSocketReady; }
 
@@ -50,6 +51,10 @@ public class Client
         string ov_n;
 
         GameObject inputFileds = GameObject.Find("UI_CreateMenu/Background/InputFields");
+        if(inputFileds == null)
+        {
+            inputFileds = GameObject.Find("UI_ConnectRoom/Background/InputFields");
+        }
 
         TMP_InputField input_host = inputFileds.transform.Find("Group_Host/Input_Host").GetComponent<TMP_InputField>();
         ov_h = input_host.text;
@@ -108,7 +113,18 @@ public class Client
     /// <param name="data">수신된 데이터</param>
     private void OnIncommingData(string data)
     {
-        if(data == "%NAME")
+        if (data.Contains("%INFO"))
+        {
+            if(!isHost)
+            {
+                string[] info = data.Split('|');
+                UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
+                window.Init(info[1], int.Parse(info[3]), int.Parse(info[2]));
+                return;
+            }
+        }
+
+        if (data == "%NAME")
         {
             Send($"&NAME | {clientName}");  // 서버에 &NAME 문자열과 클라이언트 이름을 결합하여 전송
             return;

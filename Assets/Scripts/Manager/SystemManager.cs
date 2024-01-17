@@ -19,9 +19,12 @@ public class SystemManager
     public void Init()
     {
         client = new Client();
-        server = new Server();
-
         client.Init();
+    }
+
+    public void StartServer()
+    {
+        server = new Server();
     }
 
     public void OnUpdate()

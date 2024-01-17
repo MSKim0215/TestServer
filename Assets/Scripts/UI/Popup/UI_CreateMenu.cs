@@ -35,6 +35,7 @@ public class UI_CreateMenu : MonoBehaviour
 
     private void OnConnect()
     {
+        Managers.System.StartServer();
         Server server = Managers.System.Server;
         if (server == null || server.ServerStarted) return;
         server.Init();
@@ -45,6 +46,8 @@ public class UI_CreateMenu : MonoBehaviour
 
         if(server.ServerStarted && client.IsSocketReady)
         {
+            client.isHost = true;
+
             UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
             window.Init(server.RoomName, server.Port, server.PersonCount);
         }
