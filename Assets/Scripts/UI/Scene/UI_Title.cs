@@ -47,6 +47,6 @@ public class UI_Title : MonoBehaviour
 
     private void OnConnect()
     {
-        Debug.Log("방 참여하기");
+        Managers.UI.ShowPopupUI("UI_ConnectRoom");
     }
 }
