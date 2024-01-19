@@ -35,6 +35,8 @@ public class UI_CreateMenu : MonoBehaviour
 
     private void OnConnect()
     {
+        Debug.Log("서버 실행");
+
         Managers.System.StartServer();
         Server server = Managers.System.Server;
         if (server == null || server.ServerStarted) return;

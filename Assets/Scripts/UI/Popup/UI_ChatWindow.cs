@@ -54,4 +54,9 @@ public class UI_ChatWindow : MonoBehaviour
             client.Send(message);
         }
     }
+
+    private void OnDisable()
+    {
+        Managers.System.Client.CloseSocket();
+    }
 }

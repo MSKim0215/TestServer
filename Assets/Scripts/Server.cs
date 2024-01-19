@@ -110,8 +110,11 @@ public class Server
         {
             if(!IsConnected(client.tcp))
             {   // 클라이언트가 연결을 유지하지 않았다면 실행
-                client.tcp.Close();     // client tcp를 삭제하고, 기본 TCP 연결이 닫히도록 요청한다.
-                disconnectList.Add(client);
+                if(!disconnectList.Contains(client))
+                {   // 퇴장 목록에 존재하지 않다면 실행
+                    client.tcp.Close();     // client tcp를 삭제하고, 기본 TCP 연결이 닫히도록 요청한다.
+                    disconnectList.Add(client);
+                }
                 continue;
             }
             else
@@ -128,6 +131,14 @@ public class Server
                     }
                 }
             }
+        }
+
+        for (int i = 0; i < disconnectList.Count; i++)
+        {
+            Broadcast($"{disconnectList[i].clientName} 님이 퇴장했습니다.", connectList);
+
+            connectList.Remove(disconnectList[i]);
+            disconnectList.RemoveAt(i);
         }
     }
 
@@ -192,6 +203,8 @@ public class Server
     {
         foreach(ServerClient client in clients)
         {
+            if (disconnectList.Contains(client)) continue;      // 퇴장한 사용자라면 무시
+
             try
             {
                 // 클라이언트의 TcpClient 개체에서 얻은 스트림을 사용하여 StreamWriter 개체를 인스턴스화

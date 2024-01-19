@@ -35,13 +35,18 @@ public class Managers : MonoBehaviour
             DontDestroyOnLoad(obj);
             instance = obj.GetComponent<Managers>();
 
-            instance.system.Init();
-            instance.resource.Init();
+            System.Init();
+            Resource.Init();
         }
     }
 
     private void Update()
     {
-        instance.system.OnUpdate();
+        System.OnUpdate();
+    }
+
+    private void OnApplicationQuit()
+    {
+        System.Client.CloseSocket();
     }
 }

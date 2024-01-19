@@ -120,8 +120,8 @@ public class Client
                 string[] info = data.Split('|');
                 UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
                 window.Init(info[1], int.Parse(info[3]), int.Parse(info[2]));
-                return;
             }
+            return;
         }
 
         if (data == "%NAME")
@@ -186,15 +186,5 @@ public class Client
         reader.Close();
         socket.Close();
         isSocketReady = false;
-    }
-
-    private void OnApplicationQuit()
-    {
-        CloseSocket();
-    }
-
-    private void OnDisable()
-    {
-        CloseSocket();
     }
 }
