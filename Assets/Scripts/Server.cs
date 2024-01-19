@@ -1,29 +1,27 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class Server : MonoBehaviour
+public class Server
 {
     private List<ServerClient> connectList;         // 연결된 클라이언트 목록
     private List<ServerClient> disconnectList;      // 연결 해제된 클라이언트 목록
 
-    private int port = 215;
     private string roomName = string.Empty;
 
     private TcpListener server;     // TCP 네트워크 클라이언트에서 연결을 수신
     private bool serverStarted;     // 서버 시작 체크
 
-    public int PersonCount { get => connectList.Count; }
+    private int personCount;
 
-    public int Port { get => port; }
-    public string RoomName { get => roomName; }
+    public int PersonCount { get => connectList.Count; set => personCount = value; }
+
+    public int Port { get => Managers.System.Port; set => Managers.System.Port = value; }
+    public string RoomName { get => roomName; set => roomName = value; }
 
     public bool ServerStarted { get => serverStarted; }
 
@@ -41,7 +39,7 @@ public class Server : MonoBehaviour
             int.TryParse(input_port.text, out ov_p);
             if (ov_p != 0)
             {
-                port = ov_p;
+                Port = ov_p;
             }
 
             TMP_InputField input_room = inputFileds.transform.Find("Group_Room/Input_Room").GetComponent<TMP_InputField>();
@@ -89,9 +87,22 @@ public class Server : MonoBehaviour
 
         // 연결된 클라이언트들에게 메시지를 보냄 (누군가 연결되었다고)
         Broadcast("%NAME", new List<ServerClient>() { connectList[connectList.Count - 1] });
+
+        // TODO: 새로 연결된 클라이언트에게 현재 채팅방의 이름을 넘긴다.
+        ServerClient connect_client = connectList[connectList.Count - 1];
+        try
+        {
+            StreamWriter writer = new StreamWriter(connect_client.tcp.GetStream());
+            writer.WriteLine("%INFO|" + RoomName + "|" + connectList.Count + "|" + Port);     // data 문자열을 클라이언트로 전송
+            writer.Flush();                 // 쓰여진 데이터의 즉각적인 전송을 보장하기 위해 Flush를 StreamWriter에 호출
+        }
+        catch (Exception e)
+        {
+            Debug.Log($"쓰기 오류: {connect_client.clientName}로 부터 {e.Message} 메시지 전송");
+        }
     }
 
-    private void Update()
+    public void OnUpdate()
     {
         if (!serverStarted) return;
 
@@ -99,8 +110,11 @@ public class Server : MonoBehaviour
         {
             if(!IsConnected(client.tcp))
             {   // 클라이언트가 연결을 유지하지 않았다면 실행
-                client.tcp.Close();     // client tcp를 삭제하고, 기본 TCP 연결이 닫히도록 요청한다.
-                disconnectList.Add(client);
+                if(!disconnectList.Contains(client))
+                {   // 퇴장 목록에 존재하지 않다면 실행
+                    client.tcp.Close();     // client tcp를 삭제하고, 기본 TCP 연결이 닫히도록 요청한다.
+                    disconnectList.Add(client);
+                }
                 continue;
             }
             else
@@ -117,6 +131,14 @@ public class Server : MonoBehaviour
                     }
                 }
             }
+        }
+
+        for (int i = 0; i < disconnectList.Count; i++)
+        {
+            Broadcast($"{disconnectList[i].clientName} 님이 퇴장했습니다.", connectList);
+
+            connectList.Remove(disconnectList[i]);
+            disconnectList.RemoveAt(i);
         }
     }
 
@@ -181,6 +203,8 @@ public class Server : MonoBehaviour
     {
         foreach(ServerClient client in clients)
         {
+            if (disconnectList.Contains(client)) continue;      // 퇴장한 사용자라면 무시
+
             try
             {
                 // 클라이언트의 TcpClient 개체에서 얻은 스트림을 사용하여 StreamWriter 개체를 인스턴스화

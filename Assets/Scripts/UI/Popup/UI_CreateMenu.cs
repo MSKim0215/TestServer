@@ -35,16 +35,21 @@ public class UI_CreateMenu : MonoBehaviour
 
     private void OnConnect()
     {
-        Server server = FindObjectOfType<Server>();
+        Debug.Log("서버 실행");
+
+        Managers.System.StartServer();
+        Server server = Managers.System.Server;
         if (server == null || server.ServerStarted) return;
         server.Init();
 
-        Client client = FindObjectOfType<Client>();
+        Client client = Managers.System.Client;
         if (client == null || client.IsSocketReady) return;
         client.ConnectedToServer();
 
         if(server.ServerStarted && client.IsSocketReady)
         {
+            client.isHost = true;
+
             UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
             window.Init(server.RoomName, server.Port, server.PersonCount);
         }

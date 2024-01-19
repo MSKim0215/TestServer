@@ -5,11 +5,16 @@ using UnityEngine;
 public class Managers : MonoBehaviour
 {
     private static Managers instance;
-    private static Managers Instance { get { Init(); return instance; } }
 
     private UIManager ui = new UIManager();
+    private SystemManager system = new SystemManager();
+    private ResourceManager resource = new ResourceManager();
 
-    public static UIManager UI = Instance.ui;
+    public static UIManager UI => Instance.ui;
+    public static SystemManager System => Instance.system;
+    public static ResourceManager Resource => Instance.resource;
+
+    private static Managers Instance { get { Init(); return instance; } }
 
     private void Start()
     {
@@ -29,6 +34,19 @@ public class Managers : MonoBehaviour
 
             DontDestroyOnLoad(obj);
             instance = obj.GetComponent<Managers>();
+
+            System.Init();
+            Resource.Init();
         }
+    }
+
+    private void Update()
+    {
+        System.OnUpdate();
+    }
+
+    private void OnApplicationQuit()
+    {
+        System.Client.CloseSocket();
     }
 }
