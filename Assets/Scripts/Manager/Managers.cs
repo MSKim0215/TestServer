@@ -6,13 +6,15 @@ public class Managers : MonoBehaviour
 {
     private static Managers instance;
 
-    private UIManager ui = new UIManager();
-    private SystemManager system = new SystemManager();
-    private ResourceManager resource = new ResourceManager();
+    private UIManager _ui = new UIManager();
+    private SystemManager _system = new SystemManager();
+    private ResourceManager _resource = new ResourceManager();
+    private EventManager _event = new EventManager();
 
-    public static UIManager UI => Instance.ui;
-    public static SystemManager System => Instance.system;
-    public static ResourceManager Resource => Instance.resource;
+    public static UIManager UI => Instance._ui;
+    public static SystemManager System => Instance._system;
+    public static ResourceManager Resource => Instance._resource;
+    public static EventManager Event => Instance._event;
 
     private static Managers Instance { get { Init(); return instance; } }
 

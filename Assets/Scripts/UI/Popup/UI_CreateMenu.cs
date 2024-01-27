@@ -51,7 +51,7 @@ public class UI_CreateMenu : MonoBehaviour
             client.isHost = true;
 
             UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
-            window.Init(server.RoomName, server.Port, server.PersonCount);
+            window.Init(server.RoomName, server.Port);
         }
     }
 

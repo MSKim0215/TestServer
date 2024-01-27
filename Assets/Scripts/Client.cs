@@ -17,6 +17,8 @@ public class Client
     private StreamWriter writer;
     private StreamReader reader;
 
+    private int personCount;
+
     public bool isHost = false;
 
     public TcpClient Socket { get => socket; }
@@ -25,6 +27,18 @@ public class Client
 
     public string Host { get => Managers.System.Host; set => Managers.System.Host = value; }
     public int Port { get => Managers.System.Port; set => Managers.System.Port = value; }
+    public int PersonCount
+    {
+        get => personCount;
+        set
+        {
+            personCount = value;
+
+            // 참여자 수 변경 이벤트를 이벤트 매니저에게 알림
+            Managers.Event.PostNotification(Define.EventType.Connect_Room, this, personCount);
+        }
+    }
+
 
     public void Init()
     {
@@ -119,7 +133,7 @@ public class Client
             {
                 string[] info = data.Split('|');
                 UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
-                window.Init(info[1], int.Parse(info[3]), int.Parse(info[2]));
+                window.Init(info[1], int.Parse(info[3]));
             }
             return;
         }
@@ -132,6 +146,12 @@ public class Client
 
         if(chatContainer == null)
         {
+            if(!isHost)
+            {
+                UI_ChatWindow window = Managers.UI.ShowPopupUI("UI_ChatWindow").GetComponent<UI_ChatWindow>();
+                window.Init("test", 0);
+            }
+
             ScrollRect chat_window = UnityEngine.Object.FindObjectOfType<UI_ChatWindow>().transform.Find("Background/Chat Window").GetComponent<ScrollRect>();
             chatContainer = chat_window.content;
         }
@@ -151,10 +171,16 @@ public class Client
             }
 
             speech.transform.Find("Speech").GetComponentInChildren<TextMeshProUGUI>().text = datas[1];
+
+
+            string dates = DateTime.Now.ToString(("tt hh:mm"));
+            speech.transform.Find("Date").GetComponentInChildren<TextMeshProUGUI>().text = dates;
         }
         else
         {   // 참가 메시지일 경우
-            UnityEngine.Object.Instantiate(Managers.Resource.SpeechLoad(Define.SpeechType.NoticeMessage), chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = data;
+            string[] datas = data.Split("|");
+            UnityEngine.Object.Instantiate(Managers.Resource.SpeechLoad(Define.SpeechType.NoticeMessage), chatContainer).GetComponentInChildren<TextMeshProUGUI>().text = datas[0];
+            PersonCount = int.Parse(datas[1]);
         }
 
         Fit();

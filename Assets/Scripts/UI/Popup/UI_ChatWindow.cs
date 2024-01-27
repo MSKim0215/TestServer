@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_ChatWindow : MonoBehaviour
+public class UI_ChatWindow : MonoBehaviour, IListener
 {
     private Transform top_window, send_window;
 
@@ -26,10 +26,11 @@ public class UI_ChatWindow : MonoBehaviour
         btn_send = send_window.Find("Btn_Send").GetComponent<Button>();
     }
 
-    public void Init(string roomName, int roomNumber, int personCount)
+    public void Init(string roomName, int roomNumber)
     {
+        Managers.Event.AddListner(Define.EventType.Connect_Room, this);
+
         tmp_name.text = $"{roomName} ({roomNumber})";
-        tmp_count.text = $"참여 인원: {personCount}명";
 
         btn_exit.onClick.AddListener(() => OnExit());
         btn_send.onClick.AddListener(() => OnSend());
@@ -52,11 +53,24 @@ public class UI_ChatWindow : MonoBehaviour
         if(client != null)
         {
             client.Send(message);
+            input_send.text = string.Empty;
         }
     }
 
     private void OnDisable()
     {
         Managers.System.Client.CloseSocket();
+    }
+
+    public void OnEvent<T>(Define.EventType type, T sender, object param = null)
+    {
+        switch(type)
+        {
+            case Define.EventType.Connect_Room:
+                {
+                    tmp_count.text = $"참여 인원: {param}명";
+                }
+                break;
+        }
     }
 }

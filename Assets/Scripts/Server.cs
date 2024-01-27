@@ -16,10 +16,6 @@ public class Server
     private TcpListener server;     // TCP 네트워크 클라이언트에서 연결을 수신
     private bool serverStarted;     // 서버 시작 체크
 
-    private int personCount;
-
-    public int PersonCount { get => connectList.Count; set => personCount = value; }
-
     public int Port { get => Managers.System.Port; set => Managers.System.Port = value; }
     public string RoomName { get => roomName; set => roomName = value; }
 
@@ -89,17 +85,17 @@ public class Server
         Broadcast("%NAME", new List<ServerClient>() { connectList[connectList.Count - 1] });
 
         // TODO: 새로 연결된 클라이언트에게 현재 채팅방의 이름을 넘긴다.
-        ServerClient connect_client = connectList[connectList.Count - 1];
-        try
-        {
-            StreamWriter writer = new StreamWriter(connect_client.tcp.GetStream());
-            writer.WriteLine("%INFO|" + RoomName + "|" + connectList.Count + "|" + Port);     // data 문자열을 클라이언트로 전송
-            writer.Flush();                 // 쓰여진 데이터의 즉각적인 전송을 보장하기 위해 Flush를 StreamWriter에 호출
-        }
-        catch (Exception e)
-        {
-            Debug.Log($"쓰기 오류: {connect_client.clientName}로 부터 {e.Message} 메시지 전송");
-        }
+        //ServerClient connect_client = connectList[connectList.Count - 1];
+        //try
+        //{
+        //    StreamWriter writer = new StreamWriter(connect_client.tcp.GetStream());
+        //    writer.WriteLine("%INFO|" + RoomName + "|" + connectList.Count + "|" + Port);     // data 문자열을 클라이언트로 전송
+        //    writer.Flush();                 // 쓰여진 데이터의 즉각적인 전송을 보장하기 위해 Flush를 StreamWriter에 호출
+        //}
+        //catch (Exception e)
+        //{
+        //    Debug.Log($"쓰기 오류: {connect_client.clientName}로 부터 {e.Message} 메시지 전송");
+        //}
     }
 
     public void OnUpdate()
@@ -135,9 +131,9 @@ public class Server
 
         for (int i = 0; i < disconnectList.Count; i++)
         {
-            Broadcast($"{disconnectList[i].clientName} 님이 퇴장했습니다.", connectList);
-
             connectList.Remove(disconnectList[i]);
+            Broadcast($"{disconnectList[i].clientName} 님이 퇴장했습니다.|{connectList.Count}", connectList);
+
             disconnectList.RemoveAt(i);
         }
     }
@@ -184,10 +180,10 @@ public class Server
     /// <param name="data">데이터</param>
     private void OnIncomingData(ServerClient client, string data)
     {
-        if(data.Contains("&NAME"))
+        if (data.Contains("&NAME"))
         {   // &NAME이 포함되어 있는지 체크
             client.clientName = data.Split('|')[1];     // |를 기준으로 분리하여 1번째 배열을 클라이언트 이름으로 설정
-            Broadcast($"{client.clientName}님이 참가했습니다.", connectList);  // 모든 연결된 클라이언트에게 해당 클라이언트가 연결되었다고 알림
+            Broadcast($"{client.clientName}님이 참가했습니다.|{connectList.Count}", connectList);  // 모든 연결된 클라이언트에게 해당 클라이언트가 연결되었다고 알림
             return;
         }
 

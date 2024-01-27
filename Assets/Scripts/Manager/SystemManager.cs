@@ -29,7 +29,11 @@ public class SystemManager
 
     public void OnUpdate()
     {
-        Server?.OnUpdate();
+        if(Client.isHost)
+        {
+            Server?.OnUpdate();
+        }
+
         Client?.OnUpdate();
     }
 }
